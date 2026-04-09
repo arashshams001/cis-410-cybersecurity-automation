@@ -12,3 +12,4 @@ This repository is created for CIS 410 DevSecOps course. It will be used to prac
 - Git
 - GitHub
 - Visual Studio Code
+- Test update for pipeline
