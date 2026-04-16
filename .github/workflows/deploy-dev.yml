@@ -1,29 +1,62 @@
-name: Deploy Dev
+name: "Setup — Dev Server"
 
 on:
-  push:
-    branches: [main]
+
+  workflow_dispatch:   # Manual trigger only — no automatic runs
 
 jobs:
-  deploy:
+
+  setup:
+
+    name: "Install Docker on Dev VM"
+
     runs-on: self-hosted
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
 
-      - name: Copy app files to Dev VM
-        run: |
-          mkdir -p ~/.ssh
-          printf "%s\n" "${{ secrets.DEV_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -r app/ Dockerfile .dockerignore docker-compose.yml ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}:/opt/app/
+      # ── Step 1: Configure passwordless sudo ────────────────────────────────
 
-      - name: Deploy Flask container
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "cd /opt/app && export DEPLOY_TIME=\"$(date -u +'%Y-%m-%d %H:%M:%S UTC')\" && export GITHUB_SHA=\"${{ github.sha }}\" && export GITHUB_REF_NAME=\"${{ github.ref_name }}\" && sudo docker compose down --remove-orphans && sudo DEPLOY_TIME=\"$DEPLOY_TIME\" GITHUB_SHA=\"$GITHUB_SHA\" GITHUB_REF_NAME=\"$GITHUB_REF_NAME\" docker compose up -d --build && sudo docker compose ps"
+      # Pipeline SSH sessions are non-interactive — there is no terminal to
 
-      - name: Smoke test
+      # type a password into. sudo -S reads the password from stdin instead.
+
+      # SUDO_PASS is stored as a GitHub Secret and never written to disk.
+
+      # After this step, all subsequent sudo commands run without a password.
+
+      # The guard checks if passwordless sudo is already configured so this
+
+      # step is safe to re-run.
+
+      - name: Configure passwordless sudo
+
         run: |
-          sleep 4
-          curl -f "http://${{ secrets.DEV_HOST }}:5000/health"
+
+          echo "${{ secrets.DEV_SSH_KEY }}" > /tmp/deploy_key
+
+          chmod 600 /tmp/deploy_key
+
+          ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no \
+
+            ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} \
+
+            "set -e
+
+            if sudo -n true 2>/dev/null; then
+
+              echo '=== Passwordless sudo already configured — skipping ==='
+
+            else
+
+              echo '=== Configuring passwordless sudo ==='
+
+              echo '${{ secrets.SUDO_PASS }}' | sudo -S bash -c \
+
+                'echo \"${{ secrets.DEV_USER }} ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/${{ secrets.DEV_USER }} && chmod 0440 /etc/sudoers.d/${{ secrets.DEV_USER }}'
+
+              echo '=== Passwordless sudo configured ==='
+
+            fi"
+
+          rm /tmp/deploy_key
+
