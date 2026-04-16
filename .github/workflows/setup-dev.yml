@@ -1,7 +1,7 @@
 name: "Setup — Dev Server"
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
 
 jobs:
   setup:
