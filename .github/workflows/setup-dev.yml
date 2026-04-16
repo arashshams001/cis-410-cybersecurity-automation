@@ -2,7 +2,7 @@ name: "Setup — Dev Server"
 
 on:
 
-  workflow_dispatch:   # Manual trigger only — no automatic runs
+  workflow_dispatch:   
 
 jobs:
 
@@ -14,19 +14,6 @@ jobs:
 
     steps:
 
-      # ── Step 1: Configure passwordless sudo ────────────────────────────────
-
-      # Pipeline SSH sessions are non-interactive — there is no terminal to
-
-      # type a password into. sudo -S reads the password from stdin instead.
-
-      # SUDO_PASS is stored as a GitHub Secret and never written to disk.
-
-      # After this step, all subsequent sudo commands run without a password.
-
-      # The guard checks if passwordless sudo is already configured so this
-
-      # step is safe to re-run.
 
       - name: Configure passwordless sudo
 
@@ -60,22 +47,7 @@ jobs:
 
           rm /tmp/deploy_key
 
-      # ── Step 2: Install Docker Engine ──────────────────────────────────────
-
-      # Uses the official get.docker.com convenience script — fully supported
-
-      # on Ubuntu 22.04 (Jammy) and 24.04 (Noble).
-
-      # The heredoc (<<-EOF) allows $(whoami) to expand on the Dev VM at runtime
-
-      # so usermod and chown use the correct username without hardcoding it.
-
-      # The dash in <<-EOF strips leading tabs so indentation works correctly.
-
-      # 'set -e' stops the script immediately if any command fails.
-
-      # The 'if ! command -v docker' guard makes this step safe to re-run.
-
+    
       - name: Install Docker on Dev VM
 
         run: |
@@ -118,15 +90,7 @@ jobs:
 
           rm /tmp/deploy_key
 
-      # ── Step 3: Verify the installation ────────────────────────────────────
-
-      # Confirms Docker and Docker Compose are available before deploy-dev.yml
-
-      # runs. Also confirms /opt/app exists and is owned by the correct user.
-
-      # If this step fails, re-run the workflow — do not proceed to deploy.
-
-      - name: Verify Docker
+          - name: Verify Docker
 
         run: |
 
