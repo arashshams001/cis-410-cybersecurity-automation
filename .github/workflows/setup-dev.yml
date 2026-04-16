@@ -16,8 +16,15 @@ jobs:
 
       - name: Install Docker on Dev Server
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "sudo apt update && sudo apt install -y docker.io docker-compose && sudo systemctl enable docker && sudo systemctl start docker"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "
+          sudo apt update &&
+          sudo apt install -y docker.io docker-compose &&
+          sudo systemctl enable docker &&
+          sudo systemctl start docker
+          "
 
       - name: Verify Docker
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "docker --version && docker-compose --version"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "
+          docker --version && docker-compose --version
+          "
