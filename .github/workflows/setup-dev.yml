@@ -11,7 +11,7 @@ jobs:
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          printf "%s\n" "${{ secrets.DEV_SSH_KEY }}" > ~/.ssh/deploy_key
+          echo "${{ secrets.DEV_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
       - name: Install Docker on Dev Server
