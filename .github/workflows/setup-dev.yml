@@ -9,10 +9,9 @@ jobs:
     runs-on: self-hosted
 
     steps:
-
       - name: Configure passwordless sudo
         run: |
-          echo "${{ secrets.DEV_SSH_KEY }}" > /tmp/deploy_key
+          cp ~/.ssh/deploy_key /tmp/deploy_key
           chmod 600 /tmp/deploy_key
 
           ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no \
@@ -29,10 +28,9 @@ jobs:
 
           rm /tmp/deploy_key
 
-
       - name: Install Docker on Dev VM
         run: |
-          echo "${{ secrets.DEV_SSH_KEY }}" > /tmp/deploy_key
+          cp ~/.ssh/deploy_key /tmp/deploy_key
           chmod 600 /tmp/deploy_key
 
           ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no \
@@ -54,26 +52,21 @@ jobs:
 
           rm /tmp/deploy_key
 
-
       - name: Verify Docker
         run: |
-          echo "${{ secrets.DEV_SSH_KEY }}" > /tmp/deploy_key
+          cp ~/.ssh/deploy_key /tmp/deploy_key
           chmod 600 /tmp/deploy_key
 
           ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no \
             ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} << 'EOF'
           set -e
           echo "=== Logged in as: $(whoami) ==="
-
           echo "=== Docker version ==="
           docker --version
-
           echo "=== Docker Compose version ==="
           docker compose version
-
           echo "=== Deployment directory ==="
           ls -la /opt/app
-
           echo "=== Dev server is ready for deployment ==="
           EOF
 
