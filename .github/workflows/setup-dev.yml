@@ -1,0 +1,32 @@
+name: Setup Dev Server
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEV_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Add dev host to known_hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.DEV_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Install Docker on Dev Server
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "
+            sudo apt update &&
+            sudo apt install -y docker.io docker-compose &&
+            sudo systemctl enable docker &&
+            sudo systemctl start docker
+          "
+
+      - name: Verify Docker
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "docker --version"
