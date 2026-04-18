@@ -17,9 +17,6 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          cat <<'EOF' > ~/.ssh/id_ed25519
-          ${{ secrets.DEV_SSH_KEY }}
-          EOF
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.DEV_HOST }} >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
