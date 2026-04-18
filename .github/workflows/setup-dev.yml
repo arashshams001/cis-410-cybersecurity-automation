@@ -33,10 +33,6 @@ jobs:
         run: |
           rsync -avz -e "ssh -i ~/.ssh/id_ed25519" ./ ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}:~/app/
 
-      - name: Deploy with Docker
+      - name: Test Docker on dev
         run: |
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} '
-            cd ~/app
-            docker compose down || true
-            docker compose up -d --build
-          '
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "docker ps"
