@@ -13,28 +13,38 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Prepare SSH folder
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+      - name: Decode SSH key
+        run: |
+          echo "${{ secrets.DEV_SSH_KEY }}" | base64 -d > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
       - name: Start ssh-agent and add key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.DEV_SSH_KEY }}
+        run: |
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_ed25519
 
       - name: Add dev host to known_hosts
         run: |
-          mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.DEV_HOST }} >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
 
       - name: Test SSH connection
         run: |
-          ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "hostname && whoami"
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "hostname && whoami"
 
       - name: Prepare app directory on dev
         run: |
-          ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "mkdir -p ~/app"
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "mkdir -p ~/app"
 
       - name: Copy files to dev
         run: |
-          rsync -avz --delete ./ ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}:~/app/
+          rsync -avz -e "ssh -i ~/.ssh/id_ed25519" ./ ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}:~/app/
 
       - name: Test Docker on dev
         run: |
-          ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "docker ps"
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} "docker ps"
