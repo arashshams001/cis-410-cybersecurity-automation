@@ -13,7 +13,6 @@ jobs:
         run: |
           echo "${{ secrets.DEV_SSH_KEY }}" > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
-
           ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no \
             ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} \
             "set -e
@@ -22,17 +21,15 @@ jobs:
             else
               echo '=== Configuring passwordless sudo ==='
               echo '${{ secrets.SUDO_PASS }}' | sudo -S bash -c \
-                'echo \"${{ secrets.DEV_USER }} ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/${{ secrets.DEV_USER }} && chmod 0440 /etc/sudoers.d/${{ secrets.DEV_USER }}'
+              'echo \"${{ secrets.DEV_USER }} ALL=(ALL) NOPASSWD:ALL\" > /etc/sudoers.d/${{ secrets.DEV_USER }} && chmod 0440 /etc/sudoers.d/${{ secrets.DEV_USER }}'
               echo '=== Passwordless sudo configured ==='
             fi"
-
           rm /tmp/deploy_key
 
       - name: Install Docker on Dev VM
         run: |
           echo "${{ secrets.DEV_SSH_KEY }}" > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
-
           ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no \
             ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} << 'EOF'
           set -e
@@ -49,29 +46,22 @@ jobs:
             sudo mkdir -p /opt/app && sudo chown $(whoami):$(whoami) /opt/app
           fi
           EOF
-
           rm /tmp/deploy_key
 
       - name: Verify Docker
         run: |
           echo "${{ secrets.DEV_SSH_KEY }}" > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
-
           ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no \
             ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} << 'EOF'
           set -e
           echo "=== Logged in as: $(whoami) ==="
-
           echo "=== Docker version ==="
           docker --version
-
           echo "=== Docker Compose version ==="
           docker compose version
-
           echo "=== Deployment directory ==="
           ls -la /opt/app
-
           echo "=== Dev server is ready for deployment ==="
           EOF
-
           rm /tmp/deploy_key
