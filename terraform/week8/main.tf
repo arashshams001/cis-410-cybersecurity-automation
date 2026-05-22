@@ -6,7 +6,7 @@
 # Week 7 VPC. Reads VPC outputs from Week 7 remote state.
 #
 # BEFORE RUNNING:
-#   1. Replace "cis410-yourname-xxxx-tfstate" with your actual bucket name
+#   1. Replace "cis410-arash-tfstate" with your actual bucket name
 #      in BOTH the backend block AND the data block below
 #   2. Confirm terraform/week7/ state exists:
 #      gcloud storage ls gs://YOUR_BUCKET/terraform/week7/
@@ -29,9 +29,9 @@ terraform {
   #
   # State file location: gs://YOUR_BUCKET/terraform/week8/default.tfstate
   #
-  # REPLACE: change cis410-yourname-xxxx-tfstate to your actual bucket name.
+  # REPLACE: change cis410-arash-tfstate to your actual bucket name.
   backend "gcs" {
-    bucket = "cis410-yourname-xxxx-tfstate"   # ← your bucket name
+    bucket = "cis410-arash-tfstate"   # ← your bucket name
     prefix = "terraform/week8"
   }
 
@@ -63,11 +63,11 @@ provider "google" {
 # IMPORTANT: The prefix here must exactly match the prefix used in Week 7's
 # backend block. Check terraform/week7/main.tf to confirm.
 #
-# REPLACE: change cis410-yourname-xxxx-tfstate to your actual bucket name.
+# REPLACE: change cis410-arash-tfstate to your actual bucket name.
 data "terraform_remote_state" "week7" {
   backend = "gcs"
   config = {
-    bucket = "cis410-yourname-xxxx-tfstate"   # ← same bucket as above
+    bucket = "cis410-arash-tfstate"   # ← same bucket as above
     prefix = "terraform/week7"                 # ← must match Week 7 backend prefix exactly
   }
 }
